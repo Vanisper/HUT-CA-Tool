@@ -1,0 +1,61 @@
+body,
+html {
+  padding: 0;
+  margin: 0;
+}
+
+.view-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 50%;
+  // max-width: 500px;
+  transform: translateX(-50%);
+  ::-webkit-scrollbar {
+    width: 0;
+  }
+  .common-layout {
+    margin-top: 20px;
+    height: calc(100% - 20px);
+    .el-container {
+      height: inherit;
+      .el-tabs {
+        height: 100%;
+        .el-tabs__nav-scroll {
+          height: none;
+        }
+        .el-tabs__content {
+          height: 100%;
+          .el-tab-pane {
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+}
+
+.ruleItem-description {
+  .el-collapse-item__header {
+    font-weight: bold;
+  }
+  .ruleItem-description__content {
+    text-indent: 2em;
+  }
+}
+
+.ruleItem-content {
+  .el-collapse-item__header {
+    font-weight: bold;
+  }
+  // .ruleItem-content__content {
+  // }
+}
+
+.el-upload-dragger {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
