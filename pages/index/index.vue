@@ -56,16 +56,6 @@
                     </el-tab-pane>
                     <el-tab-pane label="功能区">
                         <el-scrollbar height="100%">
-                            <el-col v-if="isAdmin==1">
-                                <el-row>
-                                    <el-button @click="clearAdmin">退出管理员</el-button>
-                                </el-row>
-                            </el-col>
-                            <el-col v-else-if="isAdmin==-1">
-                                <el-row>
-                                    <el-button @click="isAdminHandle">管理员验证</el-button>
-                                </el-row>
-                            </el-col>
                             <el-col>
                                 <el-row class="tools-box">
                                     <el-button @click="exportCP">导出创新实践证明材料</el-button>
@@ -73,7 +63,9 @@
                                 <el-row class="tools-box">
                                     <el-button @click="html2Canvas">生成综测个人评定</el-button>
                                 </el-row>
-                                <ShowPanel id="capture" :total-result="totalResult" />
+                                <el-scrollbar>
+                                    <ShowPanel id="capture" :total-result="totalResult" />
+                                </el-scrollbar>
                             </el-col>
                         </el-scrollbar>
                     </el-tab-pane>
@@ -87,7 +79,6 @@
 import { IACRule, ICPExport, ICPExportWithUser, ICPResultItem, IstudentGrade, IuserInfos } from '~~/types/types';
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 import assessmentRules from "~~/assets/datas/assessmentRules.json";
-import adminList from "~~/assets/config/admin.json";
 import Content1 from '~~/components/Rules/items/Content1.vue';
 import Content2 from '~~/components/Rules/items/Content2.vue';
 import Content3 from '~~/components/Rules/items/Content3.vue';
@@ -95,10 +86,9 @@ import ShowPanel from '~~/components/ShowPanel/index.vue';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import JSZip from "jszip";
 import FileSaver from "file-saver";
-import { base64FileHeaderMapper, convertImgToBase64 } from '~~/utils';
+import { base64FileHeaderMapper } from '~~/utils';
 import localForage from '~~/utils/localForage';
 import { htmlToCanvas } from "~~/utils/generateImg";
-import { switchCase } from '@babel/types';
 
 interface User {
     label: string;
@@ -115,41 +105,17 @@ interface SummaryMethodProps<T = User> {
 
 const isOpenMenu = ref(false)
 const isLogin = ref(false)
-const isAdmin = ref(0)
-const clearAdmin = () => {
-    localForage.removeItem("isAdmin")
-    isAdmin.value = -1;
-}
-const isAdminHandle = () => {
-    ElMessageBox.prompt('你登陆的是管理员账号,现在验证密码(你也可以跳过该选项,只不过缺少部分权限)', 'Tip', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputValidator: (v) => v == adminList[adminList.map(v => v.id).indexOf(userInfos.value.id.value)].password,
-        // inputPattern:
-        //     /[ms848789]/,
-        inputErrorMessage: '密码不正确',
-    })
-        .then(({ value }) => {
-            ElMessage({
-                type: 'success',
-                message: `欢迎你管理员：${adminList[adminList.map(v => v.id).indexOf(userInfos.value.id.value)].name}`,
-            })
-            isAdmin.value = 1;
-        })
-        .catch(() => {
-            ElMessage({
-                type: 'info',
-                message: '取消管理员验证',
-            })
-            isAdmin.value = -1;
-        })
-}
+
 const isLoginHandle = (value: boolean) => isLogin.value = value
 const clearCache = () => {
     isLogin.value = false;
-    isAdmin.value = 0;
     dialogTableVisible.value = false;
     localForage.clear();
+    // 强制刷新页面 保证下次登录可以获取到用户接口
+    const t = setTimeout(() => {
+        location.reload();
+        clearTimeout(t);
+    }, 500);
 }
 
 const userInfos = ref<IuserInfos>({
@@ -381,9 +347,6 @@ const studentGradesKey = "studentGrades"
 watch(isLogin, async () => {
 
     if (isLogin.value) {
-        if (adminList.map(v => v.id).indexOf(userInfos.value.id.value) != -1) {
-            isAdmin.value = -1;
-        }
         if (JSON.parse(await localForage.getItem(studentGradesKey)) != null) {
             try {
                 userGrades.value = JSON.parse(await localForage.getItem(studentGradesKey))
@@ -394,24 +357,48 @@ watch(isLogin, async () => {
             } catch (error) {
                 // 说明未注册
                 ElMessage({
-                    message: '该用户可能未在后台系统中<br /><br />请联系管理员(qq: 273266469)<br /><br />或者自行检查学号',
+                    message: '该用户可能未在后台系统中<br /><br />请联系管理员(qq: 273266469)<br /><br />或者自行检查学号(1)',
                     dangerouslyUseHTMLString: true,
                     type: 'error'
                 })
                 clearCache();
             }
         } else {
-            const { data } = await useFetch(() => "/api/v1/UserData");
-            data.value.code == 1 && (userGrades.value = data.value.data.filter((value) => value.id == userInfos.value.id.value && value)[0]);
+            const { data } = await useFetch(() => "/api/v1/UserData", {
+                params: {
+                    id: userInfos.value.id.value
+                }
+            });
+            if (data.value == null || data.value.code == 0) {
+                ElMessage({
+                    message: '后台没有名单数据 询问管理员(qq:273266469)',
+                    dangerouslyUseHTMLString: true,
+                    type: 'error'
+                })
+                clearCache();
+            }
+            data.value.code == 1 && (userGrades.value = {
+                id: +data.value.data.id,
+                name: data.value.data.name,
+                grades: data.value.data.resultC,
+                gradeList: data.value.data.resultA,
+                gradeWeighted: data.value.data.resultB,
+                lowGradeOldCount: data.value.data.lowOld,
+                lowGradeNewCount: data.value.data.lowNew,
+                gradeResult: data.value.data.result,
+                gradeRank: data.value.data.rank,
+            });
+
             await localForage.setItem(studentGradesKey, JSON.stringify(userGrades.value));
             try {
                 if (await localForage.getItem(studentGradesKey) == null) {
                     throw '用户未在名单中';
                 }
             } catch (error) {
+
                 // 说明未注册
                 ElMessage({
-                    message: '该用户可能未在后台系统中<br /><br />请联系管理员(qq: 273266469)<br /><br />或者自行检查学号',
+                    message: '该用户可能未在后台系统中<br /><br />请联系管理员(qq: 273266469)<br /><br />或者自行检查学号(2)',
                     dangerouslyUseHTMLString: true,
                     type: 'error'
                 })
@@ -423,11 +410,7 @@ watch(isLogin, async () => {
     immediate: false
 })
 
-watch(isAdmin, (value) => {
-    if (value == -1) {
-        isAdminHandle()
-    }
-})
+
 </script>
 
 

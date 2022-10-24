@@ -1,5 +1,7 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 import "default-passive-events";
+import path from "path";
+
 export default defineNuxtConfig({
   builder: "vite",
   vite: {
@@ -33,6 +35,18 @@ export default defineNuxtConfig({
       },
     ],
   ],
-
   css: ["@/assets/styles/main.less"],
+  runtimeConfig: {
+    env: process.env.NODE_ENV,
+    public: {
+      publicPath:
+        process.env.NODE_ENV == "development"
+          ? path.resolve(__dirname, "public")
+          : path.resolve(__dirname, ".output/public"),
+      apiBase: "api",
+      apiVersion: "v1",
+      apiUrl: "/api/v1",
+    },
+    app: {},
+  },
 });

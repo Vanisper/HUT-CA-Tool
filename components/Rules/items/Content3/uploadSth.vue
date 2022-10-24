@@ -89,8 +89,8 @@ const UploadImage = (param) => {
         uid: (new Date()).getDate(),
         url: window.URL.createObjectURL(param.file),
     });
-
 }
+
 const allowUpload = () => {
     if ((props.fileBaseName + "_" + props.fileList.length).split("_").every(v => v != '')) {
 

@@ -21,8 +21,6 @@
                 <el-col v-else>该项为全体加分项,已自动添加</el-col>
             </el-collapse-item>
         </el-collapse>
-
-
     </el-col>
 
 </template>
