@@ -12,7 +12,7 @@
                 <el-tag>加权成绩</el-tag>{{userGrades.gradeResult}}
             </el-col>
             <el-col :span="12" class="infos-box">
-                <el-tag>折算综测</el-tag>{{userGrades.gradeRank}}
+                <el-tag>综测排名</el-tag>{{userGrades.gradeRank}}
             </el-col>
             <el-col :span="12" class="infos-box">
                 <el-tag>原挂科数目</el-tag>{{userGrades.lowGradeOldCount}}

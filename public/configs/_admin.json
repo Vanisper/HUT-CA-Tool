@@ -1,12 +1,14 @@
 [
-  {
-    "name": "潘伟龙",
-    "id": "19404010099",
-    "password": "ms848789"
-  },
-  {
-    "name": "admin",
-    "id": "admin",
-    "password": "admin"
-  }
+	{
+		"name": "潘伟龙",
+		"id": "19404010099",
+		"password": "ccb84a510a4deb956ea6b5dd493792c5",
+		"token": "7tqTupIsIwzOfx/a/s1kicPLZNVbFMmej0FkQO6/vNWvAn9/CPHMCUwwaiHshmcl4sDRlfpSzAOgZkZCn2F9FxWnM8IgQSJNbgFd3mrgE7Eu/9q9E6LeZ5XR54n3OY3mXo3SjcCdC2K0R+YZ/3Xtr20cISPvd9nxyhpcQYvseYJiE263HieAFKpVAY82FKZA"
+	},
+	{
+		"name": "admin",
+		"id": "admin",
+		"password": "6b1d6630ba5f1b145274f236667e77e5",
+		"token": "uBdqVLSkc3w4Y7zPi+q2PkA3PbrN0lGzAalzvS2UKafyouezVcf+SXJ77NoQVwJpyPjk6Yd9DYPhMfJwYOADECEJynaoGCKga3YrdzhFpsXSqs8bPwzinUIh4MSS/LO3LmwSMOzNMv+a28CWIEQlzo5YhiH+3aXQ9wpsEmvzL5g="
+	}
 ]

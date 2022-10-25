@@ -1,6 +1,6 @@
 [
 	{
-		"isOpen": true,
+		"isOpen": false,
 		"label": "20级印刷加权平均分",
 		"json": "/datas/json/20级印刷加权平均分.json",
 		"excel": "/datas/excel/20级印刷加权平均分.xls",
@@ -18,6 +18,6 @@
 		"label": "印刷1903加权成绩信息",
 		"json": "/datas/json/印刷1903加权成绩信息.json",
 		"excel": "/datas/excel/印刷1903加权成绩信息.xls",
-		"excelMd5": "2f056e2617716a7f6103bb4557f93dbe"
+		"excelMd5": "b4f4560061603b3331442125dac5e319"
 	}
 ]

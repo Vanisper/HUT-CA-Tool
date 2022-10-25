@@ -2,7 +2,7 @@
     <div class="common-layout">
         <el-container>
             <el-header>
-                <el-alert title="请录入你的信息" type="warning" show-icon v-if="!isLogin" />
+                <el-alert title="请录入你的信息（出现登录问题请联系:qq273266469）" type="warning" show-icon v-if="!isLogin" />
                 <el-alert title="请录入其他信息" type="info" show-icon v-else />
             </el-header>
             <el-main v-if="!isLogin">
@@ -10,7 +10,7 @@
             </el-main>
 
             <el-main v-else>
-                <el-tabs :tab-position="!isOpenMenu?'top':'left'" class="demo-tabs">
+                <el-tabs :tab-position="!isOpenMenu ? 'top' : 'left'" class="demo-tabs">
                     <el-tab-pane label="基本信息">
                         <el-scrollbar height="100%">
                             <el-table :data="Object.values(userInfos)" style="width: 100%">
@@ -18,7 +18,7 @@
                                 <el-table-column prop="value" label="信息值" />
                             </el-table>
                             <el-divider></el-divider>
-                            <el-table v-if="Object.values(totalResult).every((value,index,arr)=>(value!=null))"
+                            <el-table v-if="Object.values(totalResult).every((value, index, arr) => (value != null))"
                                       :data="Object.values(totalResult)" style="width: 100%" show-summary sum-text="合计"
                                       :summary-method="getSummaries" @row-click="rowClick">
                                 <el-table-column prop="label" label="大类" />
@@ -27,9 +27,9 @@
                                 <el-table-column prop="weighted" label="加权" />
                                 <el-table-column prop="scores" label="总分" />
                             </el-table>
-                            <el-dialog v-if="gridData!=null" v-model="dialogTableVisible" title="详细展示">
+                            <el-dialog v-if="gridData != null" v-model="dialogTableVisible" title="详细展示">
                                 <el-table :data="gridData">
-                                    <el-table-column v-if="gridData!=null" v-for="(vv) in Object.keys(gridData[0])"
+                                    <el-table-column v-if="gridData != null" v-for="(vv) in Object.keys(gridData[0])"
                                                      :property="vv" :label="vv" />
                                 </el-table>
                             </el-dialog>
@@ -40,15 +40,15 @@
                     </el-tab-pane>
                     <el-tab-pane v-for="(acRule, index) in (assessmentRules as IACRule[])" :label="acRule.label">
                         <el-scrollbar height="100%">
-                            <el-row v-if="index==0">
+                            <el-row v-if="index == 0">
                                 <RulesItemsDescription :acRule="acRule" />
                                 <Content1 :acRule="acRule" @submit-content1="getContent1Form" />
                             </el-row>
-                            <el-row v-else-if="index==1">
+                            <el-row v-else-if="index == 1">
                                 <RulesItemsDescription :acRule="acRule" />
                                 <Content2 :userGrades="userGrades" @submit-content2="getContent2Form" />
                             </el-row>
-                            <el-row v-else-if="index==2">
+                            <el-row v-else-if="index == 2">
                                 <RulesItemsDescription :acRule="acRule" />
                                 <Content3 :acRule="acRule" @submit-content3="getContent3Form" />
                             </el-row>
@@ -115,7 +115,7 @@ const clearCache = () => {
     const t = setTimeout(() => {
         location.reload();
         clearTimeout(t);
-    }, 500);
+    }, 1500);
 }
 
 const userInfos = ref<IuserInfos>({
@@ -366,12 +366,13 @@ watch(isLogin, async () => {
         } else {
             const { data } = await useFetch(() => "/api/v1/UserData", {
                 params: {
-                    id: userInfos.value.id.value
+                    id: userInfos.value.id.value,
+                    name: userInfos.value.name.value
                 }
             });
             if (data.value == null || data.value.code == 0) {
                 ElMessage({
-                    message: '后台没有名单数据 询问管理员(qq:273266469)',
+                    message: data.value.message,
                     dangerouslyUseHTMLString: true,
                     type: 'error'
                 })

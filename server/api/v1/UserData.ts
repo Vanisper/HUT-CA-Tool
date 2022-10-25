@@ -4,15 +4,19 @@ import { PUBLIC_PATH } from "~~/commons/variables";
 import fse from "fs-extra";
 import md5 from "md5";
 import schema from "~~/public/datas/schema.json";
+import { genPassword, isToken } from "~~/utils/secret";
 
 export default defineHandle((handle) => {
-  const { id } = useQuery(handle);
+  const { id, name, passwd } = useQuery(handle);
+  const authorization = getHeader(handle, "Authorization");
+
   let studentGrades = [];
 
-  if (!id) {
+  if (!id || !name) {
     return {
       code: 0,
       data: studentGrades,
+      message: "没有传入必要参数：id或者name",
     };
   }
 
@@ -29,6 +33,7 @@ export default defineHandle((handle) => {
   fse.existsSync(jsonDataPath) ? "" : fse.mkdirpSync(jsonDataPath);
   fse.existsSync(excelDataPath) ? "" : fse.mkdirpSync(excelDataPath);
   const targetDataType = dataTypes[2];
+  let tSave = [];
 
   if (targetDataType == "excel-json") {
     if (fse.existsSync(excelDataPath)) {
@@ -38,7 +43,7 @@ export default defineHandle((handle) => {
         .map((v) => path.join(excelDataPath, v.name));
       prevFileList.forEach((ex) => {
         // 写入配置文件
-        let tSave = [];
+
         if (fse.pathExistsSync(configPath)) {
           try {
             if (
@@ -55,8 +60,20 @@ export default defineHandle((handle) => {
           const tIndex = tSave
             .map((v) => v.excelMd5)
             .indexOf(md5(fse.readFileSync(ex)));
-          const tJson = path.join(jsonDataPath, tSave[tIndex].label + ".json");
-          studentGrades.push(fse.readJsonSync(tJson));
+          if (tSave[tIndex].isOpen && !authorization) {
+            // 如果配置文件时开启收集的话就将数据名单取出
+            const tJson = path.join(
+              jsonDataPath,
+              tSave[tIndex].label + ".json"
+            );
+            studentGrades.push(fse.readJsonSync(tJson));
+          } else if (authorization) {
+            const tJson = path.join(
+              jsonDataPath,
+              tSave[tIndex].label + ".json"
+            );
+            studentGrades.push(fse.readJsonSync(tJson));
+          }
         } else {
           const tempResult = checkSchema(ex);
           if (tempResult.code) {
@@ -71,6 +88,14 @@ export default defineHandle((handle) => {
               }
             );
             studentGrades.push(tempResult.data);
+            const reIndex = tSave
+              .map((v) => v.label == path.basename(ex, path.extname(ex)))
+              .indexOf(true);
+            // 取代同名但是md5不同的配置项
+            if (reIndex >= 0) {
+              tSave.splice(reIndex, 1);
+            }
+
             tSave.push({
               isOpen: true,
               label: path.basename(ex, path.extname(ex)),
@@ -86,7 +111,53 @@ export default defineHandle((handle) => {
     }
   }
   if (studentGrades.length > 0) {
-    if (studentGrades.flat().filter((v) => v.id == id).length > 0) {
+    if (authorization && isToken(authorization as string).code) {
+      // 获取config的信息
+      return {
+        code: 1,
+        message: isToken(authorization as string).message,
+        datas: studentGrades.map((v, i) => ({
+          label: tSave[i].label,
+          json: tSave[i].json,
+          excel: tSave[i].excel,
+          isOpen: tSave[i].isOpen,
+          studentGrades: v,
+        })),
+      };
+    }
+    if (
+      !authorization &&
+      !passwd &&
+      isAdmin(id as string, passwd as string).code
+    ) {
+      return {
+        code: 0,
+        message: isAdmin(id as string, passwd as string).message,
+      };
+    } else if (
+      !authorization &&
+      passwd &&
+      isAdmin(id as string, passwd as string).code
+    ) {
+      // 获取config的信息
+      return {
+        code: 1,
+        message: isAdmin(id as string, passwd as string).message,
+        datas: studentGrades.map((v, i) => ({
+          label: tSave[i].label,
+          json: tSave[i].json,
+          excel: tSave[i].excel,
+          isOpen: tSave[i].isOpen,
+          studentGrades: v,
+        })),
+      };
+    }
+
+    if (
+      !passwd &&
+      studentGrades.flat().filter((v) => v.id == id && v.name == name).length >
+        0
+    ) {
       return {
         code: 1,
         data: studentGrades.flat().filter((v) => v.id == id)[0],
@@ -95,12 +166,15 @@ export default defineHandle((handle) => {
       return {
         code: 0,
         data: [],
+        message:
+          "后台中没有查询到用户信息<br />验证学号以及学号与姓名是否一致<br />或者后台没有开放该名单的收集请联系qq 273266469",
       };
     }
   } else {
     return {
       code: 0,
       data: studentGrades,
+      message: "后台没有开放的名单数据",
     };
   }
 });
@@ -400,4 +474,46 @@ function checkSchema(excelPath: string) {
     return result.code;
   });
   return result;
+}
+
+function isAdmin(id: string, passwd: string) {
+  const adminListPath = path.join(PUBLIC_PATH, "configs/_admin.json");
+  passwd = genPassword(passwd);
+
+  if (fse.existsSync(adminListPath)) {
+    try {
+      const admin = fse.readJsonSync(adminListPath);
+      if (admin instanceof Array) {
+        if (
+          admin.filter((v) => v.id == id && v.password == passwd).length > 0
+        ) {
+          return {
+            code: 1,
+            message:
+              "欢迎：" +
+              admin.filter((v) => v.id == id && v.password == passwd)[0].name,
+            name: admin.filter((v) => v.id == id && v.password == passwd)[0]
+              .name,
+          };
+        } else {
+          return {
+            code: 0,
+            message: "管理员身份验证失败",
+          };
+        }
+      } else {
+        throw "管理员数据格式不正确,导致无法读取";
+      }
+    } catch (error) {
+      return {
+        code: 0,
+        message: "管理员账号数据出现未知错误(请联系qq 27326649)",
+      };
+    }
+  } else {
+    return {
+      code: 0,
+      message: "后台没有设置管理员账号<br />请联系qq 273266469",
+    };
+  }
 }
