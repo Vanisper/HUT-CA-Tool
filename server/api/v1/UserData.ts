@@ -177,26 +177,25 @@ export default defineHandle((handle) => {
           json: v.json,
           excel: v.excel,
           isOpen: v.isOpen,
-          studentGrades: v,
+          studentGrades: v.datas,
         })),
       };
     }
-
+    const query = studentGrades.map((v) => v.datas).flat();
     if (
       !passwd &&
-      studentGrades.flat().filter((v) => v.id == id && v.name == name).length >
-        0
+      query.filter((v) => v.id == id && v.name == name).length > 0
     ) {
       return {
         code: 1,
-        data: studentGrades.flat().filter((v) => v.id == id)[0],
+        data: query.filter((v) => v.id == id)[0],
       };
     } else {
       return {
         code: 0,
         data: [],
         message:
-          "后台中没有查询到用户信息<br />验证学号以及学号与姓名是否一致<br />或者后台没有开放该名单的收集请联系qq 273266469",
+          "后台中没有查询到用户信息<br /><br />验证学号以及学号与姓名是否一致<br /><br />或者后台没有开放该名单的收集<br /><br />请联系qq 273266469",
       };
     }
   } else {

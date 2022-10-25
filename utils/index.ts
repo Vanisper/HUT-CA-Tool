@@ -1,7 +1,60 @@
 // 从json中去除想要的子项数据
 export const pick = (obj: Object, arr: Array<string>) =>
   arr.reduce((iter, val) => (val in obj && (iter[val] = obj[val]), iter), {});
+// 数组差集
+export const arrayAminusB = (arrA: string[], arrB: string[]) => {
+  if (arrA.length >= arrB.length) {
+    return arrA.filter((v) => !arrB.includes(v));
+  } else {
+    return arrB.filter((v) => !arrA.includes(v));
+  }
+};
 
+//
+export const dataURLtoFile = (dataurl: string, filename: string) => {
+  // 获取到base64编码
+  const arr = dataurl.split(",");
+  // 将base64编码转为字符串
+  const bstr = window.atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n); // 创建初始化为0的，包含length个元素的无符号整型数组
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, {
+    type: "image/jpeg",
+  });
+};
+// base64前缀
+export const prevBase64 = (ext: string) => {
+  const data = [
+    [".doc", "data:application/msword;base64,"],
+    [
+      "docx",
+      "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,",
+    ],
+    [".xls", "data:application/vnd.ms-excel;base64,"],
+    [
+      "xlsx",
+      "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,",
+    ],
+    [".pdf", "data:application/pdf;base64,"],
+    [".ppt", "data:application/vnd.ms-powerpoint;base64,"],
+    [
+      "pptx",
+      "data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,",
+    ],
+    [".txt", "data:text/plain;base64,"],
+    [".json", "data:text/plain;base64,"],
+    [".png", "data:image/png;base64,"],
+    [".jpg", "data:image/jpeg;base64,"],
+    [".gif", "data:image/gif;base64,"],
+    [".svg", "data:image/svg+xml;base64,"],
+    [".ico", "data:image/x-icon;base64,"],
+    [".bmp", "data:image/bmp;base64,"],
+  ];
+  return data.filter((v) => v[0] == ext)[0][1];
+};
 // 前端操作工具
 /**
  * 图像转base64
@@ -97,9 +150,9 @@ export const convertImgToBase64 = (
  */
 export const dataURItoBlob = (base64Data: string) => {
   let byteString: string;
-  if (base64Data.split(",")[0].indexOf("base64") >= 0)
-    byteString = atob(base64Data.split(",")[1]);
-  else byteString = unescape(base64Data.split(",")[1]);
+  if (base64Data.split(",")[0].indexOf("base64,") >= 0)
+    byteString = window.atob(base64Data.split(",")[1]);
+  else byteString = window.unescape(base64Data.split(",")[1]);
   let mimeString = base64Data.split(",")[0].split(":")[1].split(";")[0];
   let ia = new Uint8Array(byteString.length);
   for (let i = 0; i < byteString.length; i++) {

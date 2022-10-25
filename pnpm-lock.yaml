@@ -16,6 +16,7 @@ specifiers:
   element-plus: ^2.2.17
   file-saver: ^2.0.5
   formidable: ^2.0.1
+  fs: 0.0.1-security
   fs-extra: ^10.1.0
   got: ^12.5.2
   h3-typebox: ^0.3.0
@@ -43,6 +44,7 @@ dependencies:
   element-plus: registry.npmmirror.com/element-plus/2.2.17
   file-saver: registry.npmmirror.com/file-saver/2.0.5
   formidable: registry.npmmirror.com/formidable/2.0.1
+  fs: registry.npmmirror.com/fs/0.0.1-security
   fs-extra: registry.npmmirror.com/fs-extra/10.1.0
   got: registry.npmmirror.com/got/12.5.2
   h3-typebox: registry.npmmirror.com/h3-typebox/0.3.0
@@ -3079,6 +3081,12 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/fs.realpath/-/fs.realpath-1.0.0.tgz}
     name: fs.realpath
     version: 1.0.0
+
+  registry.npmmirror.com/fs/0.0.1-security:
+    resolution: {integrity: sha512-3XY9e1pP0CVEUCdj5BmfIZxRBTSDycnbqhIOGec9QYtmVH2fbLpj86CFWkrNOkt/Fvty4KZG5lTglL9j/gJ87w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/fs/-/fs-0.0.1-security.tgz}
+    name: fs
+    version: 0.0.1-security
+    dev: false
 
   registry.npmmirror.com/fsevents/2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/fsevents/-/fsevents-2.3.2.tgz}

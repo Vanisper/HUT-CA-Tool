@@ -106,7 +106,7 @@ export default async (req: IncomingMessage) => {
                     "/datas/json/" +
                     path.basename(filen, path.extname(filen)) +
                     ".json",
-                  excel: "/upload/datas/excel/" + path.basename(filen),
+                  excel: "/datas/excel/" + path.basename(filen),
                   isOpen: isOpen,
                   studentGrades: checkResult.data,
                 },

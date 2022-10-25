@@ -8,6 +8,7 @@ import path from "path";
 import { PUBLIC_PATH } from "~~/commons/variables";
 import fse from "fs-extra";
 import { isToken } from "~~/utils/secret";
+import { arrayAminusB } from "~~/utils";
 
 export default defineHandle(async (event) => {
   const body = await validateBody(
@@ -53,34 +54,65 @@ export function updateConfig(
   if (fse.existsSync(datasConfigPath)) {
     try {
       const config = fse.readJSONSync(datasConfigPath);
-      const tConfig = config.map(
-        (
-          v: {
-            isOpen: boolean;
-            label: string;
-            json: string;
-            excel: string;
-          },
-          i: number
-        ) => {
-          v = {
-            isOpen: dataConfig[i].isOpen,
-            label: dataConfig[i].label,
-            json: dataConfig[i].json,
-            excel: dataConfig[i].excel,
-          };
+      if (config.length == dataConfig.length) {
+        const tConfig = config.map(
+          (
+            v: {
+              isOpen: boolean;
+              label: string;
+              json: string;
+              excel: string;
+            },
+            i: number
+          ) => {
+            v = {
+              isOpen: dataConfig[i].isOpen,
+              label: dataConfig[i].label,
+              json: dataConfig[i].json,
+              excel: dataConfig[i].excel,
+            };
 
-          return v;
-        }
-      );
-      fse.writeJsonSync(datasConfigPath, tConfig, {
-        spaces: "\t",
-        encoding: "utf-8",
-      });
-      return {
-        code: 1,
-        message: "配置文件更新成功",
-      };
+            return v;
+          }
+        );
+        fse.writeJsonSync(datasConfigPath, tConfig, {
+          spaces: "\t",
+          encoding: "utf-8",
+        });
+        return {
+          code: 1,
+          message: "配置文件更新成功",
+        };
+      } else {
+        const config = fse.readJSONSync(datasConfigPath);
+        const tConfig = dataConfig.map((v, i, a) => {
+          return {
+            isOpen: a[i].isOpen,
+            label: a[i].label,
+            json: a[i].json,
+            excel: a[i].excel,
+          };
+        });
+        const jsonName = tConfig.map((v) => v.json);
+        const excelName = tConfig.map((v) => v.excel);
+        const jsonTname = config.map((v: any) => v.json);
+        const excelTname = config.map((v: any) => v.excel);
+        arrayAminusB(jsonName, jsonTname).forEach((v) => {
+          fse.removeSync(path.join(PUBLIC_PATH, v));
+        });
+        arrayAminusB(excelName, excelTname).forEach((v) => {
+          fse.removeSync(path.join(PUBLIC_PATH, v));
+        });
+        fse.writeJsonSync(datasConfigPath, tConfig, {
+          spaces: "\t",
+          encoding: "utf-8",
+        });
+
+        return {
+          code: 1,
+          message: "配置文件更新成功",
+        };
+      }
     } catch (error) {
       return { code: 0, message: "更新配置失败(配置文件格式可能有问题)" };
     }

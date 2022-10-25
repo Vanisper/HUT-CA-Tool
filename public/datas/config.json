@@ -1,9 +1,15 @@
 [
 	{
 		"isOpen": true,
-		"label": "湖南工业大学_0_1",
-		"json": "/datas/json/湖南工业大学_0_1.json",
-		"excel": "/datas/excel/湖南工业大学_0_1.xls"
+		"label": "湖南工业大学_19_印刷工程_1901",
+		"json": "/datas/json/湖南工业大学_19_印刷工程_1901.json",
+		"excel": "/datas/excel/湖南工业大学_19_印刷工程_1901.xls"
+	},
+	{
+		"isOpen": false,
+		"label": "湖南工业大学_19_印刷工程_1902",
+		"json": "/datas/json/湖南工业大学_19_印刷工程_1902.json",
+		"excel": "/datas/excel/湖南工业大学_19_印刷工程_1902.xls"
 	},
 	{
 		"isOpen": true,
@@ -13,26 +19,8 @@
 	},
 	{
 		"isOpen": true,
-		"label": "湖南工业大学_1_1",
-		"json": "/datas/json/湖南工业大学_1_1.json",
-		"excel": "/datas/excel/湖南工业大学_1_1.xls"
-	},
-	{
-		"isOpen": true,
-		"label": "湖南工业大学_2_2",
-		"json": "/datas/json/湖南工业大学_2_2.json",
-		"excel": "/datas/excel/湖南工业大学_2_2.xls"
-	},
-	{
-		"isOpen": true,
-		"label": "湖南工业大学_q_q",
-		"json": "/datas/json/湖南工业大学_q_q.json",
-		"excel": "/datas/excel/湖南工业大学_q_q.xls"
-	},
-	{
-		"isOpen": true,
-		"label": "湖南工业大学_0_0",
-		"json": "/datas/json/湖南工业大学_0_0.json",
-		"excel": "/datas/excel/湖南工业大学_0_0.xls"
+		"label": "湖南工业大学_20_印刷工程",
+		"json": "/datas/json/湖南工业大学_20_印刷工程.json",
+		"excel": "/datas/excel/湖南工业大学_20_印刷工程.xls"
 	}
 ]

@@ -4,7 +4,7 @@
             <el-main style="height: 100%;width: 100%;">
                 <div v-if="!adminInfos.isCertified">
                     <el-image style="position: absolute;left: 0;top: 0;width: 100%;height: 100%;z-index: -99;"
-                              src="/assets/images/admin-top-bg.svg" fit="cover" />
+                              src="/images/admin-top-bg.svg" fit="cover" />
                     <el-card
                              style="transform: translateY(30%);max-width: 500px;margin: 0 auto;padding: 30px 60px 60px 60px;background-color: #ffffffb3;margin-top: 50px;">
                         <h3 style="color: #ff2929;text-align: center;font-size: larger;">HUT综测收集管理员登录</h3>
@@ -33,7 +33,14 @@
                     </el-card>
                 </div>
                 <div v-else>
-                    <el-descriptions title="User Info" border>
+                    <el-descriptions title="管理信息" border>
+                        <template #extra>
+                            <el-button type="danger" round size="small" @click="loginOut">
+                                <el-icon>
+                                    <Close />
+                                </el-icon>
+                            </el-button>
+                        </template>
                         <el-descriptions-item label="管理员id">
                             {{ adminInfos.id }}
                         </el-descriptions-item>
@@ -43,6 +50,7 @@
                         <el-descriptions-item label="数据表个数">
                             {{ datas?.length }}
                         </el-descriptions-item>
+
                     </el-descriptions>
                     <!-- <el-table :data="datas">
                         <el-table-column :prop="value" :label="value" v-for="(value,index) in Object.keys(datas[0])" />
@@ -52,35 +60,34 @@
                             <star-filled />
                         </el-icon>
                     </el-divider>
-                    <el-table :data="tableData" style="width: 100%">
+                    <el-table :data="tableData" style="width: 100%;">
                         <el-table-column fixed prop="school" label="学校" />
                         <el-table-column prop="grade" label="年级(专业/-班级)" />
                         <el-table-column prop="count" label="成员数量" />
                         <el-table-column prop="json" label="JSON">
                             <template #default="scope">
-                                <el-button v-if="tableData[scope.$index] != null" link type="primary" size="small">
-                                    <el-link target="_blank" :href="tableData[scope.$index].json">
-                                        {{
-                                                tableData[scope.$index].json.split("/")[tableData[scope.$index].json.split("/").length
-                                                - 1]
-                                        }}
-                                    </el-link>
+                                <el-button v-if="tableData[scope.$index] != null" link type="primary" size="small"
+                                           @click="getSrc(useRuntimeConfig().public.apiUrl + '/GetPublicSrc?path=' + tableData[scope.$index].json)">
+                                    json数据
                                 </el-button>
                             </template>
                         </el-table-column>
                         <el-table-column prop="excel" label="EXCEL">
                             <template #default="scope">
-                                <el-button v-if="tableData[scope.$index] != null" link type="primary" size="small">
-                                    <el-link target="_blank" :href="tableData[scope.$index].excel">
-                                        {{
-                                                tableData[scope.$index].excel.split("/")[tableData[scope.$index].excel.split("/").length
-                                                - 1]
-                                        }}
-                                    </el-link>
+                                <el-button v-if="tableData[scope.$index] != null" link type="primary" size="small"
+                                           @click="getSrc(useRuntimeConfig().public.apiUrl + '/GetPublicSrc?path=' + tableData[scope.$index].excel)">
+                                    excel数据
                                 </el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="detal" label="详细" />
+                        <el-table-column label="详细">
+                            <template #default="scope">
+                                <el-button v-if="tableData[scope.$index] != null" link type="danger" size="small"
+                                           @click.prevent="showDetail(tableData[scope.$index].detail)">
+                                    <el-tag>{{ scope.$index }} Click</el-tag>
+                                </el-button>
+                            </template>
+                        </el-table-column>
                         <el-table-column fixed="right" label="开放/移除">
                             <template #default="scope">
                                 <el-switch v-model="switchValue[scope.$index]" class="ml-2" inline-prompt
@@ -92,15 +99,31 @@
                             </template>
                         </el-table-column>
                     </el-table>
+                    <el-dialog v-model="dialogTableVisible" title="详细" style="min-width: 95vw;">
+                        <el-table :data="detail">
+                            <el-table-column property="id" label="学号" />
+                            <el-table-column property="name" label="姓名" />
+                            <el-table-column property="result" label="加权平均分" />
+                            <el-table-column property="lowOld" label="挂科(旧)" />
+                            <el-table-column property="lowNew" label="挂科(新)" />
+                            <el-table-column property="rank" label="排名" />
+                        </el-table>
+                    </el-dialog>
                     <el-button v-if="!isAdd" link type="primary" style="width: 100%;" @click="onAddNewItem">添加
                     </el-button>
                     <el-col v-if="isAdd">
-                        <el-row>
-                            <el-tag>{{ excelLabel }}</el-tag>
+                        <el-row style="margin: 20px;">
+                            <el-tag><b style="color:#ff2929;">标签：</b>{{ excelLabel }}</el-tag>
+                            <el-tag><b style="color:#ff2929;">是否开放收集：</b>{{ tempChecked }}</el-tag>
+                            <el-button type="danger" @click="close" style="margin-left: 10px;" size="small">
+                                <el-icon class="el-icon--left">
+                                    <CircleCloseFilled />
+                                </el-icon>
+                                取消上传
+                            </el-button>
                         </el-row>
-                        <el-row>{{ tempChecked }}</el-row>
-                        <el-row>{{ tempTableData }}</el-row>
-                        <el-col>
+
+                        <el-col style="margin-left: 20px;">
                             <el-upload ref="uploadRef"
                                        :action="useRuntimeConfig().public.apiUrl + '/UpLoadExcel?filename=' + excelLabel + '&isOpen=' + tempChecked"
                                        :headers="headerObj" :before-upload="allowUpload" :limit="1"
@@ -127,9 +150,11 @@
   
 <script lang="ts" setup>
 import axios from "axios";
-import { ElInput, ElMessage, ElMessageBox, ElSwitch, ElUpload, genFileId, UploadFile, UploadFiles, UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from "element-plus";
-import { StarFilled } from "@element-plus/icons-vue";
+import { ElInput, ElMessage, ElMessageBox, ElNotification, ElSwitch, ElTable, ElTableColumn, ElUpload, genFileId, UploadFile, UploadFiles, UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from "element-plus";
+import { StarFilled, CircleCloseFilled, Close } from "@element-plus/icons-vue";
 import { IstudentGrade } from "~~/types/types";
+import FileSaver from "file-saver";
+import { dataURItoBlob } from "~~/utils/index";
 
 const formLabelAlign = reactive({
     id: '',
@@ -180,12 +205,28 @@ const deleteRow = (index: number) => {
         inputErrorMessage: '输入不匹配',
         draggable: true,
     })
-        .then(({ value }) => {
-            tableData.value.splice(index, 1)
+        .then(async ({ value }) => {
+            tableData.value.splice(index, 1);
             ElMessage({
                 type: 'success',
                 message: `成功移除:${value}`,
+            });
+
+            await axios.post(useRuntimeConfig().public.apiUrl + "/UpdateConfig", {
+                token: localStorage.getItem("token"),
+                dataConfig: tableData.value
+            }).then((res) => {
+                ElMessage({
+                    type: res.data.code ? "success" : "error",
+                    message: res.data.message
+                })
+            }).catch((err) => {
+                ElMessage({
+                    type: "error",
+                    message: "未知错误：" + err
+                })
             })
+
         })
         .catch(() => {
             ElMessage({
@@ -261,6 +302,11 @@ const onAddNewItem = async () => {
                 ElMessage({
                     type: "success",
                     message: "录入成功",
+                });
+                ElNotification.info({
+                    title: "提示",
+                    dangerouslyUseHTMLString: true,
+                    message: "请继续点击下方“选择文件”的按钮<br />上传<b>指定模板</b>的excel文件",
                 })
                 return true;
             } else {
@@ -293,7 +339,10 @@ const onAddItem = () => {
 const onSubmit = async () => {
     await isAdmin(formLabelAlign.id, formLabelAlign.passwd);
 }
-
+const getSrc = async (src: string) => {
+    const data = (await axios.get(src)).data;
+    FileSaver.saveAs((data.prev + data.data), data.name + data.ext);
+}
 onMounted(async () => {
     const token = localStorage.getItem("token");
     if (token != null) {
@@ -320,6 +369,15 @@ onMounted(async () => {
 
 
 })
+const loginOut = () => {
+    localStorage.removeItem("token");
+    adminInfos.isCertified = false;
+    tableData.value = [];
+    ElMessage({
+        type: "info",
+        message: "退出登录"
+    })
+}
 const headerObj = ref();
 watch(adminInfos, async (_value) => {
 
@@ -434,29 +492,21 @@ const onSuccess = (response: any, uploadFile: UploadFile, uploadFiles: UploadFil
         })
     }
 }
-
-
-const UploadExcel = (param: any) => {
-    const formData = new FormData()
-    formData.append('file', param.file)
-    const filename = excelLabel.value;
-
-    if (filename) {
-        param.onSuccess({
-            data: {
-                name: filename,
-            }
-        }, {
-            name: filename,
-            status: 'success',
-            uid: param.file.uid,
-            url: window.URL.createObjectURL(param.file),
-        });
-    } else {
-        param.onError()
-    }
+const dialogTableVisible = ref(false);
+const detail = ref();
+const showDetail = (det: any) => {
+    detail.value = det;
+    dialogTableVisible.value = true;
 }
-
+const close = () => {
+    isAdd.value = false
+    tempChecked.value = true
+    excelLabel.value = ""
+    ElMessage({
+        type: "info",
+        message: "取消录入",
+    })
+}
 
 const isAdmin = async (id: string, passwd: string) => {
     await axios.get(useRuntimeConfig().public.apiUrl + "/IsAdmin", {
