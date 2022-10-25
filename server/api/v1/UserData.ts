@@ -2,7 +2,6 @@ import XLSX from "xlsx";
 import path from "path";
 import { PUBLIC_PATH } from "~~/commons/variables";
 import fse from "fs-extra";
-import md5 from "md5";
 import schema from "~~/public/datas/schema.json";
 import { genPassword, isToken } from "~~/utils/secret";
 
@@ -29,31 +28,21 @@ export default defineHandle((handle) => {
   const dataTypes = ["json", "excel", "excel-json"] as const;
   const jsonDataPath = path.join(PUBLIC_PATH, "datas/json");
   const excelDataPath = path.join(PUBLIC_PATH, "datas/excel");
-  const upLoadExcelDataPath = path.join(PUBLIC_PATH, "upload/datas/excel");
   const configPath = path.join(PUBLIC_PATH, "datas/config.json");
   fse.existsSync(jsonDataPath) ? "" : fse.mkdirpSync(jsonDataPath);
   fse.existsSync(excelDataPath) ? "" : fse.mkdirpSync(excelDataPath);
-  fse.existsSync(upLoadExcelDataPath)
-    ? ""
-    : fse.mkdirpSync(upLoadExcelDataPath);
+
   const targetDataType = dataTypes[2];
   let tSave = [];
 
   if (targetDataType == "excel-json") {
-    if (fse.existsSync(excelDataPath) && fse.existsSync(upLoadExcelDataPath)) {
-      const prevFileList1 = fse
+    if (fse.existsSync(excelDataPath)) {
+      const prevFileList = fse
         .readdirSync(excelDataPath, { encoding: "utf-8", withFileTypes: true })
         .filter((v) => v.isFile())
         .map((v) => path.join(excelDataPath, v.name));
-      const prevFileList2 = fse
-        .readdirSync(upLoadExcelDataPath, {
-          encoding: "utf-8",
-          withFileTypes: true,
-        })
-        .filter((v) => v.isFile())
-        .map((v) => path.join(upLoadExcelDataPath, v.name));
-      const prevFileList = [...prevFileList1, ...prevFileList2];
-      prevFileList.forEach((ex) => {
+
+      prevFileList.forEach((ex, iii) => {
         // 写入配置文件
         if (fse.pathExistsSync(configPath)) {
           try {
@@ -66,24 +55,46 @@ export default defineHandle((handle) => {
             tSave = [];
           }
         }
-        if (tSave.map((v) => v.excelMd5).includes(md5(fse.readFileSync(ex)))) {
-          // 已存在数据
+
+        if (
+          tSave
+            .map((v) => v.label)
+            .includes(path.basename(ex, path.extname(ex)))
+        ) {
+          // 已存在同label数据
           const tIndex = tSave
-            .map((v) => v.excelMd5)
-            .indexOf(md5(fse.readFileSync(ex)));
+            .map((v) => v.label)
+            .indexOf(path.basename(ex, path.extname(ex)));
+
           if (tSave[tIndex].isOpen && !authorization) {
-            // 如果配置文件时开启收集的话就将数据名单取出
+            // 普通用户：如果配置文件时开启收集的话就将数据名单取出
             const tJson = path.join(
               jsonDataPath,
               tSave[tIndex].label + ".json"
             );
-            studentGrades.push(fse.readJsonSync(tJson));
-          } else if (authorization) {
+            studentGrades.push({
+              datas: fse.readJsonSync(tJson),
+              label: path.basename(ex, path.extname(ex)),
+              json:
+                "/datas/json/" + path.basename(ex, path.extname(ex)) + ".json",
+              excel: "/datas/excel/" + path.basename(ex),
+              isOpen: true,
+            });
+          }
+          if (authorization) {
             const tJson = path.join(
               jsonDataPath,
               tSave[tIndex].label + ".json"
             );
-            studentGrades.push(fse.readJsonSync(tJson));
+
+            studentGrades.push({
+              datas: fse.readJsonSync(tJson),
+              label: path.basename(ex, path.extname(ex)),
+              json:
+                "/datas/json/" + path.basename(ex, path.extname(ex)) + ".json",
+              excel: "/datas/excel/" + path.basename(ex),
+              isOpen: tSave[tIndex].isOpen,
+            });
           }
         } else {
           const tempResult = checkSchema(ex);
@@ -98,11 +109,19 @@ export default defineHandle((handle) => {
                 spaces: "\t",
               }
             );
-            studentGrades.push(tempResult.data);
+            studentGrades.push({
+              datas: tempResult.data,
+              label: path.basename(ex, path.extname(ex)),
+              json:
+                "/datas/json/" + path.basename(ex, path.extname(ex)) + ".json",
+              excel: "/datas/excel/" + path.basename(ex),
+              isOpen: true,
+            });
+
             const reIndex = tSave
               .map((v) => v.label == path.basename(ex, path.extname(ex)))
               .indexOf(true);
-            // 取代同名但是md5不同的配置项
+            // 取代同名
             if (reIndex >= 0) {
               tSave.splice(reIndex, 1);
             }
@@ -113,7 +132,6 @@ export default defineHandle((handle) => {
               json:
                 "/datas/json/" + path.basename(ex, path.extname(ex)) + ".json",
               excel: "/datas/excel/" + path.basename(ex),
-              excelMd5: md5(fse.readFileSync(ex)),
             });
             fse.writeJSONSync(configPath, tSave, { spaces: "\t" });
           }
@@ -128,11 +146,11 @@ export default defineHandle((handle) => {
         code: 1,
         message: isToken(authorization as string).message,
         datas: studentGrades.map((v, i) => ({
-          label: tSave[i].label,
-          json: tSave[i].json,
-          excel: tSave[i].excel,
-          isOpen: tSave[i].isOpen,
-          studentGrades: v,
+          label: v.label,
+          json: v.json,
+          excel: v.excel,
+          isOpen: v.isOpen,
+          studentGrades: v.datas,
         })),
       };
     }
@@ -155,10 +173,10 @@ export default defineHandle((handle) => {
         code: 1,
         message: isAdmin(id as string, passwd as string).message,
         datas: studentGrades.map((v, i) => ({
-          label: tSave[i].label,
-          json: tSave[i].json,
-          excel: tSave[i].excel,
-          isOpen: tSave[i].isOpen,
+          label: v.label,
+          json: v.json,
+          excel: v.excel,
+          isOpen: v.isOpen,
           studentGrades: v,
         })),
       };

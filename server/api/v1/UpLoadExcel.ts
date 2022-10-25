@@ -6,10 +6,9 @@ import fse from "fs-extra";
 import { isToken } from "~~/utils/secret";
 import { PUBLIC_PATH } from "~~/commons/variables";
 import { checkSchema } from "./UserData";
-import { updateConfig } from "./UpdateConfig";
-import md5 from "md5";
 
-const UPLOAD_DIR = path.join(PUBLIC_PATH, "/upload/datas/excel");
+
+const UPLOAD_DIR = path.join(PUBLIC_PATH, "datas/excel");
 const jsonDataPath = path.join(PUBLIC_PATH, "datas/json");
 if (!fse.existsSync(UPLOAD_DIR)) {
   fse.mkdirpSync(UPLOAD_DIR);
@@ -81,8 +80,8 @@ export default async (req: IncomingMessage) => {
                         "/datas/json/" +
                         path.basename(filen, path.extname(filen)) +
                         ".json",
-                      excel: "/upload/datas/excel/" + path.basename(filen),
-                      excelMd5: md5(fse.readFileSync(filen)),
+                      excel: "/datas/excel/" + path.basename(filen),
+                      
                     });
                     fse.writeJsonSync(configPath, config, {
                       spaces: "\t",

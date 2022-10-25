@@ -54,7 +54,7 @@
                     </el-divider>
                     <el-table :data="tableData" style="width: 100%">
                         <el-table-column fixed prop="school" label="学校" />
-                        <el-table-column prop="grade" label="年级" />
+                        <el-table-column prop="grade" label="年级(专业/-班级)" />
                         <el-table-column prop="count" label="成员数量" />
                         <el-table-column prop="json" label="JSON">
                             <template #default="scope">
@@ -337,11 +337,12 @@ watch(adminInfos, async (_value) => {
                         "Authorization": localStorage.getItem("token")
                     };
                     datas.value = data.datas
+
                     if (datas.value.length > 0) {
                         datas.value.forEach((value: { json: string, excel: string, label: string, isOpen: boolean, studentGrades: IstudentGrade[] }, _index: number) => {
                             let temp = {
                                 label: value.label,
-                                grade: value.label.split('_').length == 3 ? value.label.split('_')[2] : value.label,
+                                grade: value.label.split('_').length >= 3 ? `${value.label.split('_')[1]}(${value.label.split('_')[2]}${value.label.split('_').length == 4 ? "-" + value.label.split('_')[3] : ""})` : value.label,
                                 school: value.label.split('_')[0],
                                 count: value.studentGrades.length,
                                 isOpen: value.isOpen,
@@ -355,11 +356,14 @@ watch(adminInfos, async (_value) => {
                         })
                     }
                 } else {
-                    throw data.message;
+                    // throw data.message;
                 }
             }).catch((_error) => {
-                console.log(_error);
                 adminInfos.isCertified = false;
+                ElMessage({
+                    type: "error",
+                    message: "未知错误：" + _error
+                })
             })
         }
     }
@@ -396,7 +400,26 @@ const onSuccess = (response: any, uploadFile: UploadFile, uploadFiles: UploadFil
             type: "success",
             message: response.message,
         });
-        console.log(response.data);
+        let temp = {
+            label: response.data.label,
+            grade: response.data.label.split('_').length >= 3 ? `${response.data.label.split('_')[1]}(${response.data.label.split('_')[2]}${response.data.label.split('_').length == 4 ? "-" + response.data.label.split('_')[3] : ""})` : response.data.label,
+            school: response.data.label.split('_')[0],
+            count: response.data.studentGrades.length,
+            isOpen: response.data.isOpen,
+            json: response.data.json,
+            excel: response.data.excel,
+            detail: response.data.studentGrades
+        }
+        const reIndex = tableData.value.map(v => v.label).indexOf(response.data.label);
+        if (reIndex >= 0) {
+            tableData.value[reIndex] = temp
+        } else {
+            tempTableData.value = temp
+            onAddItem();
+        }
+        isAdd.value = false;
+        tempChecked.value = true
+        excelLabel.value = "";
     } else {
         isAdd.value = false
         tempChecked.value = true

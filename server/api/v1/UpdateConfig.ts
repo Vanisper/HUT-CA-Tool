@@ -60,24 +60,15 @@ export function updateConfig(
             label: string;
             json: string;
             excel: string;
-            excelMd5?: string;
           },
           i: number
         ) => {
-          v = v.excelMd5
-            ? {
-                isOpen: dataConfig[i].isOpen,
-                label: dataConfig[i].label,
-                json: dataConfig[i].json,
-                excel: dataConfig[i].excel,
-                excelMd5: v.excelMd5,
-              }
-            : {
-                isOpen: dataConfig[i].isOpen,
-                label: dataConfig[i].label,
-                json: dataConfig[i].json,
-                excel: dataConfig[i].excel,
-              };
+          v = {
+            isOpen: dataConfig[i].isOpen,
+            label: dataConfig[i].label,
+            json: dataConfig[i].json,
+            excel: dataConfig[i].excel,
+          };
 
           return v;
         }

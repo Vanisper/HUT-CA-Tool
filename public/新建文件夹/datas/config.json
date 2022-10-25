@@ -1,0 +1,65 @@
+[
+	{
+		"isOpen": true,
+		"label": "20级印刷加权平均分",
+		"json": "/datas/json/20级印刷加权平均分.json",
+		"excel": "/datas/excel/20级印刷加权平均分.xls",
+		"excelMd5": "52f14e99f564abd1119c1320cd7213e9"
+	},
+	{
+		"isOpen": true,
+		"label": "包创2001加权成绩信息",
+		"json": "/datas/json/包创2001加权成绩信息.json",
+		"excel": "/datas/excel/包创2001加权成绩信息.xls",
+		"excelMd5": "7811f6d2bf7db98b6c435aa7cdee1db2"
+	},
+	{
+		"isOpen": true,
+		"label": "印刷1903加权成绩信息",
+		"json": "/datas/json/印刷1903加权成绩信息.json",
+		"excel": "/datas/excel/印刷1903加权成绩信息.xls",
+		"excelMd5": "b4f4560061603b3331442125dac5e319"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_19_印刷工程_印刷1903班",
+		"json": "/datas/json/湖南工业大学_19_印刷工程_印刷1903班.json",
+		"excel": "/datas/excel/湖南工业大学_19_印刷工程_印刷1903班.xls",
+		"excelMd5": "b4f4560061603b3331442125dac5e319"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_1_1",
+		"json": "/datas/json/湖南工业大学_1_1.json",
+		"excel": "/datas/excel/湖南工业大学_1_1.xls",
+		"excelMd5": "3eae940843d708389573cdfdfb36fbc8"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_1_2",
+		"json": "/datas/json/湖南工业大学_1_2.json",
+		"excel": "/datas/excel/湖南工业大学_1_2.xls",
+		"excelMd5": "491680180494739290ca9b9616cfc21e"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_2_2",
+		"json": "/datas/json/湖南工业大学_2_2.json",
+		"excel": "/datas/excel/湖南工业大学_2_2.xls",
+		"excelMd5": "3eae940843d708389573cdfdfb36fbc8"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_q_q_q",
+		"json": "/datas/json/湖南工业大学_q_q_q.json",
+		"excel": "/datas/excel/湖南工业大学_q_q_q.xls",
+		"excelMd5": "b4f4560061603b3331442125dac5e319"
+	},
+	{
+		"isOpen": true,
+		"label": "湖南工业大学_w_w",
+		"json": "/datas/json/湖南工业大学_w_w.json",
+		"excel": "/datas/excel/湖南工业大学_w_w.xls",
+		"excelMd5": "02d0a41aa88ea63ef5cf2c70568aabc8"
+	}
+]
