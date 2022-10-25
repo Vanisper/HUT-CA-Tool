@@ -92,7 +92,8 @@
                             </template>
                         </el-table-column>
                     </el-table>
-                    <el-button link type="primary" style="width: 100%;" @click="onAddNewItem">添加</el-button>
+                    <el-button v-if="!isAdd" link type="primary" style="width: 100%;" @click="onAddNewItem">添加
+                    </el-button>
                     <el-col v-if="isAdd">
                         <el-row>
                             <el-tag>{{ excelLabel }}</el-tag>
@@ -101,9 +102,10 @@
                         <el-row>{{ tempTableData }}</el-row>
                         <el-col>
                             <el-upload ref="uploadRef"
-                                       :action="useRuntimeConfig().public.apiUrl + '/UpLoadExcel?filename=' + excelLabel + '&ext=xlsx'"
-                                       :before-upload="allowUpload" :limit="1" :on-exceed="handleExceed"
-                                       :auto-upload="true" accept=".xls,.xlsx" :on-success="onSuccess">
+                                       :action="useRuntimeConfig().public.apiUrl + '/UpLoadExcel?filename=' + excelLabel + '&isOpen=' + tempChecked"
+                                       :headers="headerObj" :before-upload="allowUpload" :limit="1"
+                                       :on-exceed="handleExceed" :auto-upload="true" accept=".xls,.xlsx"
+                                       :on-success="onSuccess">
                                 <template #trigger>
                                     <el-button type="primary">选择文件</el-button>
                                 </template>
@@ -262,6 +264,7 @@ const onAddNewItem = async () => {
                 })
                 return true;
             } else {
+                isAdd.value = false
                 tempChecked.value = true
                 excelLabel.value = ""
                 ElMessage({
@@ -302,13 +305,22 @@ onMounted(async () => {
             adminInfos.name = tokenResult.name;
             adminInfos.passwd = tokenResult.password;
             adminInfos.isCertified = true;
+            headerObj.value = {
+                "Authorization": localStorage.getItem("token")
+            };
         } else {
             adminInfos.isCertified = false;
+            localStorage.removeItem("token");
+            ElMessage({
+                type: "error",
+                message: tokenResult.message,
+            })
         }
     }
 
 
 })
+const headerObj = ref();
 watch(adminInfos, async (_value) => {
 
     if (!adminInfos.isCertified) {
@@ -321,6 +333,9 @@ watch(adminInfos, async (_value) => {
                 }
             }).then(({ data }) => {
                 if (data.code) {
+                    headerObj.value = {
+                        "Authorization": localStorage.getItem("token")
+                    };
                     datas.value = data.datas
                     if (datas.value.length > 0) {
                         datas.value.forEach((value: { json: string, excel: string, label: string, isOpen: boolean, studentGrades: IstudentGrade[] }, _index: number) => {
@@ -364,30 +379,35 @@ const handleExceed: UploadProps['onExceed'] = (files) => {
 
 
 const allowUpload = () => {
-    if (excelLabel.value) {
-
+    if (excelLabel.value && excelLabel.value.split("_").length >= 3) {
+        return true;
     } else {
         ElMessage({
             message: "请将相关信息填写完成之后再上传数据",
             type: "error"
         })
-
+        return false;
     }
-    return (excelLabel.value);
 }
 
 const onSuccess = (response: any, uploadFile: UploadFile, uploadFiles: UploadFiles) => {
-    if (response.code == 200) {
+    if (response.code) {
         ElMessage({
             type: "success",
-            message: response.msg,
+            message: response.message,
         });
-        console.log(response);
-
+        console.log(response.data);
     } else {
+        isAdd.value = false
+        tempChecked.value = true
+        excelLabel.value = ""
+        ElMessage({
+            type: "info",
+            message: "取消录入",
+        })
         ElMessage({
             type: "error",
-            message: "上传失败",
+            message: "上传失败：" + response.message,
         })
     }
 }
@@ -397,7 +417,6 @@ const UploadExcel = (param: any) => {
     const formData = new FormData()
     formData.append('file', param.file)
     const filename = excelLabel.value;
-    console.log(window.URL.createObjectURL(param.file));
 
     if (filename) {
         param.onSuccess({
@@ -440,11 +459,9 @@ const isAdmin = async (id: string, passwd: string) => {
             });
         }
     }).catch((_error) => {
-        console.log(_error);
-
         ElMessage({
             type: "error",
-            message: "未知错误(接口崩啦)[联系qq 273266469]"
+            message: "未知错误(接口崩啦)[联系qq 273266469]：" + _error
         });
     })
 }

@@ -29,21 +29,32 @@ export default defineHandle((handle) => {
   const dataTypes = ["json", "excel", "excel-json"] as const;
   const jsonDataPath = path.join(PUBLIC_PATH, "datas/json");
   const excelDataPath = path.join(PUBLIC_PATH, "datas/excel");
+  const upLoadExcelDataPath = path.join(PUBLIC_PATH, "upload/datas/excel");
   const configPath = path.join(PUBLIC_PATH, "datas/config.json");
   fse.existsSync(jsonDataPath) ? "" : fse.mkdirpSync(jsonDataPath);
   fse.existsSync(excelDataPath) ? "" : fse.mkdirpSync(excelDataPath);
+  fse.existsSync(upLoadExcelDataPath)
+    ? ""
+    : fse.mkdirpSync(upLoadExcelDataPath);
   const targetDataType = dataTypes[2];
   let tSave = [];
 
   if (targetDataType == "excel-json") {
-    if (fse.existsSync(excelDataPath)) {
-      const prevFileList = fse
+    if (fse.existsSync(excelDataPath) && fse.existsSync(upLoadExcelDataPath)) {
+      const prevFileList1 = fse
         .readdirSync(excelDataPath, { encoding: "utf-8", withFileTypes: true })
         .filter((v) => v.isFile())
         .map((v) => path.join(excelDataPath, v.name));
+      const prevFileList2 = fse
+        .readdirSync(upLoadExcelDataPath, {
+          encoding: "utf-8",
+          withFileTypes: true,
+        })
+        .filter((v) => v.isFile())
+        .map((v) => path.join(upLoadExcelDataPath, v.name));
+      const prevFileList = [...prevFileList1, ...prevFileList2];
       prevFileList.forEach((ex) => {
         // 写入配置文件
-
         if (fse.pathExistsSync(configPath)) {
           try {
             if (
@@ -179,7 +190,7 @@ export default defineHandle((handle) => {
   }
 });
 
-function checkSchema(excelPath: string) {
+export function checkSchema(excelPath: string) {
   const workbook = XLSX.readFile(excelPath);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   // 表格所有行数

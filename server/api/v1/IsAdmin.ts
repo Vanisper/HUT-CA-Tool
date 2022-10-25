@@ -3,8 +3,8 @@ import fse from "fs-extra";
 import path from "path";
 import { genPassword, genToken } from "~~/utils/secret";
 
-console.log(genPassword("admin"));
-console.log(genPassword("ms848789"));
+// console.log(genPassword("admin"));
+// console.log(genPassword("ms848789"));
 
 export default defineHandle((handle) => {
   const { id, passwd } = useQuery(handle);
