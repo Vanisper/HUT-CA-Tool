@@ -1,0 +1,53 @@
+body,
+html {
+  padding: 0;
+  margin: 0;
+}
+#capture {
+  width: fit-content;
+}
+.view-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.view-container ::-webkit-scrollbar {
+  width: 0;
+}
+.view-container .common-layout {
+  margin-top: 20px;
+  height: calc(100% - 20px);
+}
+.view-container .common-layout .el-container {
+  height: inherit;
+}
+.view-container .common-layout .el-container .el-tabs {
+  height: 100%;
+}
+.view-container .common-layout .el-container .el-tabs .el-tabs__nav-scroll {
+  height: none;
+}
+.view-container .common-layout .el-container .el-tabs .el-tabs__content {
+  height: 100%;
+}
+.view-container .common-layout .el-container .el-tabs .el-tabs__content .el-tab-pane {
+  height: 100%;
+}
+.ruleItem-description .el-collapse-item__header {
+  font-weight: bold;
+}
+.ruleItem-description .ruleItem-description__content {
+  text-indent: 2em;
+}
+.ruleItem-content .el-collapse-item__header {
+  font-weight: bold;
+}
+.el-upload-dragger {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

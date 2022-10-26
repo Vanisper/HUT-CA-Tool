@@ -1,5 +1,4 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
-import "default-passive-events";
 import path from "path";
 
 export default defineNuxtConfig({
@@ -35,7 +34,7 @@ export default defineNuxtConfig({
       },
     ],
   ],
-  css: ["@/assets/styles/main.less"],
+  css: ["@/assets/styles/main.css"],
   runtimeConfig: {
     env: process.env.NODE_ENV,
     public: {

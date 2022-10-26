@@ -421,4 +421,8 @@ watch(isLogin, async () => {
     align-items: center;
     margin-top: 25px;
 }
+
+#capture {
+    width: fit-content;
+}
 </style>
